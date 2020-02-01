@@ -1,0 +1,4 @@
+<resources>
+    <string name="app_name">StorageWithPermissions</string>
+    <string name="latitude_text">Latitude: %.2f,\nLongtitude: %.2f</string>
+</resources>
