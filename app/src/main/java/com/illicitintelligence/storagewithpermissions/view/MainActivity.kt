@@ -14,14 +14,17 @@ import android.os.Bundle
 import android.util.Log
 import android.view.View
 import android.widget.ArrayAdapter
-import android.widget.TextView
 import android.widget.Toast
 import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
+import androidx.room.Room
+import androidx.room.RoomDatabase
+import com.illicitintelligence.storagewithpermissions.LocationBaseAdapter
 import com.illicitintelligence.storagewithpermissions.R
-import com.illicitintelligence.storagewithpermissions.database.LocationDatabasHelper
+import com.illicitintelligence.storagewithpermissions.database.helper.LocationDatabasHelper
+import com.illicitintelligence.storagewithpermissions.database.room.LocationDatabase
+import com.illicitintelligence.storagewithpermissions.database.room.LocationEntity
 import kotlinx.android.synthetic.main.activity_main.*
-import kotlin.math.ln
 
 class MainActivity : AppCompatActivity(), LocationListener {
 
@@ -32,15 +35,29 @@ class MainActivity : AppCompatActivity(), LocationListener {
 
     private lateinit var databaseHelper: LocationDatabasHelper
 
+    private lateinit var locationDatabase: LocationDatabase
+
     private val REQUEST_CODE = 707
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
 
+        locationDatabase = Room
+            .databaseBuilder(
+                this,
+                LocationDatabase::class.java,
+                "locationz.db"
+            )
+            .allowMainThreadQueries()
+            .build()
+
         mySharedPreferences = getSharedPreferences(packageName, Context.MODE_PRIVATE)
 
-        databaseHelper = LocationDatabasHelper(this)
+//        databaseHelper =
+//            LocationDatabasHelper(
+//                this
+//            )
         get_location_button.setOnClickListener { view ->
 
             location_textview.text =
@@ -156,8 +173,14 @@ class MainActivity : AppCompatActivity(), LocationListener {
             "${mySharedPreferences.getString("last_location", "No Value")}\n${locationString}"
         editor.putString("last_location", previous)
         editor.apply()
-        writeToDatabase(location)
-        readFromDatabase()
+
+//        For SQLite
+//        writeToDatabase(location)
+//        readFromDatabase()
+
+//        For Room
+        writeToRoomDatabase(location)
+        readFromRoomDatabase()
 
     }
 
@@ -185,6 +208,32 @@ class MainActivity : AppCompatActivity(), LocationListener {
         get_location_button.visibility = View.GONE
         open_settings.visibility = View.VISIBLE
     }
+
+
+    private fun writeToRoomDatabase(location: Location) {
+
+        locationDatabase
+            .getDAO()
+            .insertLocation(
+                LocationEntity(
+                    location.latitude.toString(),
+                    location.longitude.toString()
+                )
+            )
+
+        readFromRoomDatabase()
+    }
+
+    private fun readFromRoomDatabase() {
+
+        val listOfEntity = locationDatabase.getDAO()
+            .getAllLocation()
+
+        val baseAdapter = LocationBaseAdapter(listOfEntity)
+
+        latlng_listview.adapter = baseAdapter
+    }
+
 
     private fun writeToDatabase(location: Location) {
 
@@ -224,7 +273,7 @@ class MainActivity : AppCompatActivity(), LocationListener {
         latlng_listview.setOnItemClickListener { parent, view, position, id ->
             Log.d("TAG_X", "position $position ${idList[position]}")
             databaseHelper.deleteLocation(idList[position])
-            readFromDatabase()
+//            readFromDatabase()
         }
     }
 

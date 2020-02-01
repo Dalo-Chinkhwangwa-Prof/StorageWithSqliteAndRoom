@@ -6,7 +6,7 @@ import android.content.Context
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.MutableLiveData
 import com.illicitintelligence.storagewithpermissions.R
-import com.illicitintelligence.storagewithpermissions.database.LocationDatabasHelper
+import com.illicitintelligence.storagewithpermissions.database.helper.LocationDatabasHelper
 
 class LocationViewModel(application: Application): AndroidViewModel(application) {
 

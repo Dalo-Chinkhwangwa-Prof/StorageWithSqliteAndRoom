@@ -1,4 +1,4 @@
-package com.illicitintelligence.storagewithpermissions.database
+package com.illicitintelligence.storagewithpermissions.database.helper
 
 import android.content.ContentValues
 import android.content.Context
