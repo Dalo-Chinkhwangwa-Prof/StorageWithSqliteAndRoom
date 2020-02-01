@@ -18,8 +18,8 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
 import androidx.room.Room
-import com.illicitintelligence.storagewithpermissions.adapter.LocationBaseAdapter
 import com.illicitintelligence.storagewithpermissions.R
+import com.illicitintelligence.storagewithpermissions.adapter.LocationBaseAdapter
 import com.illicitintelligence.storagewithpermissions.adapter.PlaceBaseAdapter
 import com.illicitintelligence.storagewithpermissions.database.helper.LocationDatabasHelper
 import com.illicitintelligence.storagewithpermissions.database.room.LocationDatabase
