@@ -9,22 +9,27 @@ import android.location.Location
 import android.location.LocationListener
 import android.location.LocationManager
 import android.net.Uri
-import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
 import android.util.Log
 import android.view.View
 import android.widget.ArrayAdapter
 import android.widget.Toast
+import androidx.appcompat.app.AppCompatActivity
 import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
 import androidx.room.Room
-import androidx.room.RoomDatabase
-import com.illicitintelligence.storagewithpermissions.LocationBaseAdapter
+import com.illicitintelligence.storagewithpermissions.adapter.LocationBaseAdapter
 import com.illicitintelligence.storagewithpermissions.R
+import com.illicitintelligence.storagewithpermissions.adapter.PlaceBaseAdapter
 import com.illicitintelligence.storagewithpermissions.database.helper.LocationDatabasHelper
 import com.illicitintelligence.storagewithpermissions.database.room.LocationDatabase
 import com.illicitintelligence.storagewithpermissions.database.room.LocationEntity
+import com.illicitintelligence.storagewithpermissions.model.Places
+import com.illicitintelligence.storagewithpermissions.network.RetrofitInstance
 import kotlinx.android.synthetic.main.activity_main.*
+import retrofit2.Call
+import retrofit2.Callback
+import retrofit2.Response
 
 class MainActivity : AppCompatActivity(), LocationListener {
 
@@ -38,6 +43,8 @@ class MainActivity : AppCompatActivity(), LocationListener {
     private lateinit var locationDatabase: LocationDatabase
 
     private val REQUEST_CODE = 707
+
+    private val retrofitInstance = RetrofitInstance()
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -179,8 +186,31 @@ class MainActivity : AppCompatActivity(), LocationListener {
 //        readFromDatabase()
 
 //        For Room
-        writeToRoomDatabase(location)
-        readFromRoomDatabase()
+//        writeToRoomDatabase(location)
+//        readFromRoomDatabase()
+
+            retrofitInstance.getPlaces(
+                "${location.latitude},${location.longitude}",
+                1500
+            ).enqueue(object : Callback<Places> {
+                override fun onResponse(call: Call<Places>, response: Response<Places>) {
+                    Log.d("TAG_X", "Retrieved from ${call.request().url()}")
+                    response.body()?.let { places ->
+                        Log.d("TAG_X", "Retrieved : ${places.results.size}")
+                        val placeAdapter =
+                            PlaceBaseAdapter(places.results)
+
+                        latlng_listview.adapter = placeAdapter
+                    }
+
+                }
+
+                override fun onFailure(call: Call<Places>, t: Throwable) {
+                    Toast.makeText(this@MainActivity, "Error", Toast.LENGTH_SHORT).show()
+                }
+
+            })
+
 
     }
 
@@ -229,7 +259,8 @@ class MainActivity : AppCompatActivity(), LocationListener {
         val listOfEntity = locationDatabase.getDAO()
             .getAllLocation()
 
-        val baseAdapter = LocationBaseAdapter(listOfEntity)
+        val baseAdapter =
+            LocationBaseAdapter(listOfEntity)
 
         latlng_listview.adapter = baseAdapter
     }
